@@ -1,15 +1,14 @@
-use std::net::{TcpListener, TcpStream};
+mod database;
+mod rsa_tools;
+mod server;
 
-fn handle_client(stream: TcpStream) {
-    // ...
-}
+use server::*;
+use tokio::net::TcpListener;
 
-fn main() -> std::io::Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:56789")?;
-
-    for stream in listener.incoming() {
-        handle_client(stream?);
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
+    let listener = TcpListener::bind("127.0.0.1:7878").await.unwrap();
+    while let Ok((stream, _address)) = listener.accept().await {
+        tokio::spawn(handle_connection(stream));
     }
-    
-    Ok(())
 }
