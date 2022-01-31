@@ -1,3 +1,5 @@
+use crate::server::submit_identity;
+use crate::get_identity_database_handle;
 use crate::rsa_tools::{generate_keypair, sign};
 use crate::server::export_public_key_to_binary;
 use crate::server::parse_packet;
@@ -26,8 +28,10 @@ fn test_verify_packet_signature() {
     assert_eq!(verify_packet_signature(&packet), true);
 }
 
-#[test]
-fn test_submit_identity() {
+#[tokio::test]
+async fn test_submit_identity() {
+    let (private_key, public_key) = generate_keypair(8192);
+    let signature = sign(private_key, [1; 1024].to_vec());
     let db = get_identity_database_handle();
     let packet = FennelServerPacket {
         command: [0; 1],
@@ -38,5 +42,5 @@ fn test_submit_identity() {
         public_key: export_public_key_to_binary(public_key).unwrap(),
         recipient: [0; 32],
     };
-    assert_eq!(submit_identity(db, packet), &[0]);
+    assert_eq!(submit_identity(db, packet).await, &[0]);
 }
