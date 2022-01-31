@@ -1,11 +1,11 @@
-#[cfg(test)]
-use crate::rsa_tools::verify;
-use crate::rsa_tools::sign;
 use crate::rsa_tools::decrypt;
 use crate::rsa_tools::encrypt;
-use crate::rsa_tools::import_keypair_from_file;
 use crate::rsa_tools::export_keypair_to_file;
 use crate::rsa_tools::generate_keypair;
+use crate::rsa_tools::import_keypair_from_file;
+use crate::rsa_tools::sign;
+#[cfg(test)]
+use crate::rsa_tools::verify;
 use std::path::PathBuf;
 
 #[test]

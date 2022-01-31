@@ -1,8 +1,8 @@
-use crate::server::verify_packet_signature;
-use crate::server::export_public_key_to_binary;
-use crate::server::FennelServerPacket;
-use crate::server::parse_packet;
 use crate::rsa_tools::{generate_keypair, sign};
+use crate::server::export_public_key_to_binary;
+use crate::server::parse_packet;
+use crate::server::verify_packet_signature;
+use crate::server::FennelServerPacket;
 
 #[cfg(test)]
 #[test]
@@ -24,4 +24,19 @@ fn test_verify_packet_signature() {
         recipient: [0; 32],
     };
     assert_eq!(verify_packet_signature(&packet), true);
+}
+
+#[test]
+fn test_submit_identity() {
+    let db = get_identity_database_handle();
+    let packet = FennelServerPacket {
+        command: [0; 1],
+        identity: [0; 32],
+        fingerprint: [0; 32],
+        message: [1; 1024],
+        signature: signature.try_into().unwrap(),
+        public_key: export_public_key_to_binary(public_key).unwrap(),
+        recipient: [0; 32],
+    };
+    assert_eq!(submit_identity(db, packet), &[0]);
 }

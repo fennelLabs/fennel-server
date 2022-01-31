@@ -1,14 +1,14 @@
-#[cfg(test)]
-use crate::get_identity_database_handle;
-use crate::database::insert_identity;
-use crate::database::retrieve_identity;
 use crate::database::bytes_to_identity;
 use crate::database::bytes_to_message;
+use crate::database::insert_identity;
 use crate::database::insert_message;
 use crate::database::message_to_bytes;
+use crate::database::retrieve_identity;
 use crate::database::retrieve_messages;
 use crate::database::Message;
 use crate::database::{get_message_database_handle, identity_to_bytes, Identity};
+#[cfg(test)]
+use crate::get_identity_database_handle;
 use std::sync::Arc;
 
 #[test]
@@ -97,10 +97,7 @@ fn test_insert_and_retrieve_identity() {
         public_key: [0; 1038],
     };
     insert_identity(db, &identity).expect("failed identity insertion");
-    let result: Identity = retrieve_identity(
-        db_2,
-        [0; 32]
-    );
+    let result: Identity = retrieve_identity(db_2, [0; 32]);
     assert_eq!(identity.identity_id, result.identity_id);
     assert_eq!(identity.fingerprint, result.fingerprint);
     assert_eq!(identity.public_key, result.public_key);

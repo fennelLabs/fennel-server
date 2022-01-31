@@ -92,10 +92,10 @@ pub fn export_public_key_to_binary(public_key: RsaPublicKey) -> Result<[u8; 1038
     println!("{}", public_key_ref[0]);
     let public_key_array: [u8; 1038] = match public_key_ref.try_into() {
         Ok(v) => v,
-        Err(e) => { 
+        Err(e) => {
             println!("{}", public_key_ref.len());
             panic!("{}", e);
-        },
+        }
     };
     Ok(public_key_array)
 }
