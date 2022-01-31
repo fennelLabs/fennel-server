@@ -15,3 +15,7 @@ Cargo.lock
 /target
 identity.db
 message.db
+Private.key
+Public.key
+PrivateBench.key
+PublicBench.key

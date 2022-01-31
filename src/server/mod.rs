@@ -1,5 +1,10 @@
+mod tests;
+
 use crate::database::*;
 use crate::rsa_tools::*;
+use rocksdb::DB;
+use std::sync::Arc;
+use std::sync::Mutex;
 use tokio::io::*;
 use tokio::net::TcpStream;
 
@@ -9,25 +14,31 @@ struct FennelServerPacket {
     fingerprint: [u8; 32],
     message: [u8; 1024],
     signature: [u8; 1024],
-    public_key: [u8; 1024],
+    public_key: [u8; 1038],
     recipient: [u8; 32],
 }
 
-pub async fn handle_connection(mut stream: TcpStream) -> Result<()> {
-    let mut buffer = [0; 3170];
+pub async fn handle_connection(
+    identity_db: Arc<Mutex<DB>>,
+    message_db: Arc<Mutex<DB>>,
+    mut stream: TcpStream,
+) -> Result<()> {
+    let mut buffer = [0; 3184];
     stream.read_exact(&mut buffer).await.unwrap();
     let server_packet: FennelServerPacket = parse_packet(buffer);
     if !verify_packet_signature(&server_packet) {
         panic!("packet signature failed to verify");
     }
     if server_packet.command == [0] {
-        let r = submit_identity(server_packet).await;
+        let r = submit_identity(identity_db, server_packet).await;
         stream.write_all(r).await?;
+        stream.write_all(&[0]).await?;
     } else if server_packet.command == [1] {
-        let r = send_message(server_packet).await;
+        let r = send_message(message_db, server_packet).await;
         stream.write_all(r).await?;
+        stream.write_all(&[0]).await?;
     } else if server_packet.command == [2] {
-        let r_list = get_messages(server_packet).await;
+        let r_list = get_messages(message_db, server_packet).await;
         for r in r_list {
             stream.write_all(&r).await?;
         }
@@ -39,7 +50,7 @@ pub async fn handle_connection(mut stream: TcpStream) -> Result<()> {
     Ok(())
 }
 
-fn parse_packet(buffer: [u8; 3170]) -> FennelServerPacket {
+fn parse_packet(buffer: [u8; 3184]) -> FennelServerPacket {
     FennelServerPacket {
         command: buffer[0..1].try_into().expect("slice with incorrect lenth"),
         identity: buffer[1..33]
@@ -54,10 +65,10 @@ fn parse_packet(buffer: [u8; 3170]) -> FennelServerPacket {
         signature: buffer[1089..2113]
             .try_into()
             .expect("slice with incorrect length"),
-        public_key: buffer[2113..3137]
+        public_key: buffer[2113..3151]
             .try_into()
             .expect("slice with incorrect length"),
-        recipient: buffer[3137..3169]
+        recipient: buffer[3151..3183]
             .try_into()
             .expect("slice with incorrect length"),
     }
@@ -65,19 +76,18 @@ fn parse_packet(buffer: [u8; 3170]) -> FennelServerPacket {
 
 fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     let pub_key =
-        import_keypair_from_binary(packet.public_key).expect("public key failed to import");
+        import_public_key_from_binary(packet.public_key).expect("public key failed to import");
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
-async fn submit_identity(packet: FennelServerPacket) -> &'static [u8] {
-    let db = get_identity_database_handle();
+async fn submit_identity(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'static [u8] {
     let r = insert_identity(
         db,
-        Identity {
+        &(Identity {
             identity_id: packet.identity,
             fingerprint: packet.fingerprint,
             public_key: packet.public_key,
-        },
+        }),
     );
     match r {
         Ok(_) => &[0],
@@ -85,8 +95,7 @@ async fn submit_identity(packet: FennelServerPacket) -> &'static [u8] {
     }
 }
 
-async fn send_message(packet: FennelServerPacket) -> &'static [u8] {
-    let db = get_message_database_handle();
+async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'static [u8] {
     let r = insert_message(
         db,
         Message {
@@ -104,9 +113,9 @@ async fn send_message(packet: FennelServerPacket) -> &'static [u8] {
     }
 }
 
-async fn get_messages(packet: FennelServerPacket) -> Vec<[u8; 3169]> {
-    let db = get_message_database_handle();
-    let messages = retrieve_messages(&db, retrieve_identity(&db, packet.identity));
+async fn get_messages(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> Vec<[u8; 3169]> {
+    let copied_db = Arc::clone(&db);
+    let messages = retrieve_messages(db, retrieve_identity(copied_db, packet.identity));
     let mut result: Vec<[u8; 3169]> = Vec::new();
     for message in messages {
         result.push(message_to_bytes(&message).try_into().unwrap());
