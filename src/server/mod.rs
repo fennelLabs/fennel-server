@@ -8,6 +8,7 @@ use std::sync::Mutex;
 use tokio::io::*;
 use tokio::net::TcpStream;
 
+#[derive(Copy, Clone)]
 struct FennelServerPacket {
     command: [u8; 1],
     identity: [u8; 32],
@@ -76,7 +77,7 @@ fn parse_packet(buffer: [u8; 3184]) -> FennelServerPacket {
 
 fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
     let pub_key =
-        import_public_key_from_binary(packet.public_key).expect("public key failed to import");
+        import_public_key_from_binary(&packet.public_key).expect("public key failed to import");
     verify(pub_key, packet.message.to_vec(), packet.signature.to_vec())
 }
 
