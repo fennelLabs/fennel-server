@@ -44,3 +44,7 @@ jobs:
       - name: Test Build
         run: >
           cargo test
+
+      - name: Bench Build
+        run: >
+          cargo bench

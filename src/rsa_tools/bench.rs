@@ -8,14 +8,7 @@ use test::Bencher;
 #[bench]
 fn bench_generate_2048(b: &mut Bencher) {
     b.iter(|| {
-        let (private_key, public_key) = generate_keypair(2048);
-        export_keypair_to_file(
-            &private_key,
-            &public_key,
-            PathBuf::from("./PrivateBench.key"),
-            PathBuf::from("./PublicBench.key"),
-        )
-        .expect("failed to export keys");
+        generate_keypair(2048);
     });
 }
 
@@ -36,11 +29,7 @@ fn bench_generate_8192(b: &mut Bencher) {
 #[bench]
 fn bench_encrypt(b: &mut Bencher) {
     let test = b"this is test text";
-    let (_, public_key) = import_keypair_from_file(
-        PathBuf::from("./PrivateBench.key"),
-        PathBuf::from("./PublicBench.key"),
-    )
-    .expect("failed to import key");
+    let (_, public_key) = generate_keypair(2048);
     b.iter(|| {
         encrypt(public_key.clone(), test.to_vec());
     });
@@ -49,11 +38,7 @@ fn bench_encrypt(b: &mut Bencher) {
 #[bench]
 fn bench_decrypt(b: &mut Bencher) {
     let test = b"this is test text";
-    let (private_key, public_key) = import_keypair_from_file(
-        PathBuf::from("./PrivateBench.key"),
-        PathBuf::from("./PublicBench.key"),
-    )
-    .expect("failed to import key");
+    let (private_key, public_key) = generate_keypair(2048);
     let result = encrypt(public_key, test.to_vec());
     b.iter(|| {
         decrypt(private_key.clone(), result.clone());
@@ -63,11 +48,7 @@ fn bench_decrypt(b: &mut Bencher) {
 #[bench]
 fn bench_sign(b: &mut Bencher) {
     let test = b"this is test text";
-    let (private_key, _) = import_keypair_from_file(
-        PathBuf::from("./PrivateBench.key"),
-        PathBuf::from("./PublicBench.key"),
-    )
-    .expect("failed to import key");
+    let (private_key, _) = generate_keypair(2048);
     b.iter(|| {
         sign(private_key.clone(), test.to_vec().clone());
     });
@@ -76,11 +57,7 @@ fn bench_sign(b: &mut Bencher) {
 #[bench]
 fn bench_verify(b: &mut Bencher) {
     let test = b"this is test text";
-    let (private_key, public_key) = import_keypair_from_file(
-        PathBuf::from("./PrivateBench.key"),
-        PathBuf::from("./PublicBench.key"),
-    )
-    .expect("failed to import key");
+    let (private_key, public_key) = generate_keypair(2048);
     let signed = sign(private_key, test.to_vec());
     b.iter(|| {
         verify(public_key.clone(), test.to_vec().clone(), signed.clone());

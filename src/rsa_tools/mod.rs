@@ -89,7 +89,7 @@ pub fn import_public_key_from_binary(
 }
 
 pub fn export_public_key_to_binary(public_key: &RsaPublicKey) -> Result<[u8; 1038], Error> {
-    let public_key_binary = RsaPublicKey::to_pkcs1_der(&public_key).unwrap();
+    let public_key_binary = RsaPublicKey::to_pkcs1_der(public_key).unwrap();
     let public_key_ref = public_key_binary.as_der();
     let public_key_array: [u8; 1038] = match public_key_ref.try_into() {
         Ok(v) => v,
