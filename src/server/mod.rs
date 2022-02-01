@@ -1,7 +1,9 @@
+#[cfg(test)]
 mod tests;
 
 use crate::database::*;
 use crate::rsa_tools::*;
+use crate::types::Bytes;
 use rocksdb::DB;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -85,7 +87,7 @@ async fn submit_identity(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'st
     let r = insert_identity(
         db,
         &(Identity {
-            identity_id: packet.identity,
+            id: packet.identity,
             fingerprint: packet.fingerprint,
             public_key: packet.public_key,
         }),
@@ -122,7 +124,7 @@ async fn get_messages(
     let messages = retrieve_messages(messages_db, retrieve_identity(identity_db, packet.identity));
     let mut result: Vec<[u8; 3169]> = Vec::new();
     for message in messages {
-        result.push(message_to_bytes(&message).try_into().unwrap());
+        result.push(Bytes::from(&message).try_into().unwrap());
     }
     result
 }

@@ -1,8 +1,11 @@
 #![feature(test)]
+#[forbid(unsafe_code)]
+#[deny(warnings)]
 
 mod database;
 mod rsa_tools;
 mod server;
+mod types;
 
 use crate::database::get_identity_database_handle;
 use crate::database::get_message_database_handle;

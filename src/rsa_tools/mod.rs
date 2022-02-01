@@ -1,4 +1,6 @@
+#[cfg(test)]
 mod bench;
+#[cfg(test)]
 mod tests;
 
 use rand::rngs::OsRng;
@@ -16,10 +18,11 @@ use std::hash::Hash;
 pub fn hash<H: Hash + AsRef<[u8]>>(text: H) -> Vec<u8> {
     let mut hasher = Sha3_512::new();
     hasher.update(text);
-    (&hasher.finalize()).to_vec()
+    hasher.finalize().to_vec()
 }
 
 /// Generate a public/private keypair and return it as RSA structs.
+#[allow(unused)]
 pub fn generate_keypair(bits: usize) -> (RsaPrivateKey, RsaPublicKey) {
     let mut rng = OsRng;
     let private_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
@@ -28,6 +31,7 @@ pub fn generate_keypair(bits: usize) -> (RsaPrivateKey, RsaPublicKey) {
 }
 
 /// Given plaintext, encrypt it with the provided public key.
+#[allow(unused)]
 pub fn encrypt(public_key: RsaPublicKey, plaintext: Vec<u8>) -> Vec<u8> {
     let mut rng = OsRng;
     let padding = PaddingScheme::new_pkcs1v15_encrypt();
@@ -37,6 +41,7 @@ pub fn encrypt(public_key: RsaPublicKey, plaintext: Vec<u8>) -> Vec<u8> {
 }
 
 /// Given a private key, decrypt ciphertext produced with its related public key.
+#[allow(unused)]
 pub fn decrypt(private_key: RsaPrivateKey, ciphertext: Vec<u8>) -> Vec<u8> {
     let padding = PaddingScheme::new_pkcs1v15_encrypt();
     private_key
@@ -45,6 +50,7 @@ pub fn decrypt(private_key: RsaPrivateKey, ciphertext: Vec<u8>) -> Vec<u8> {
 }
 
 // Issue a signature from `private_key` on `message`.
+#[allow(unused)]
 pub fn sign(private_key: RsaPrivateKey, message: Vec<u8>) -> Vec<u8> {
     let padding = PaddingScheme::new_pkcs1v15_sign(Some(SHA3_512));
     let digest = hash(&message);
@@ -59,6 +65,7 @@ pub fn verify(public_key: RsaPublicKey, message: Vec<u8>, signature: Vec<u8>) ->
 }
 
 /// Read in a keypair from a file.
+#[allow(unused)]
 pub fn import_keypair_from_file(
     private_keyfile_path: std::path::PathBuf,
     public_keyfile_path: std::path::PathBuf,
@@ -69,6 +76,7 @@ pub fn import_keypair_from_file(
 }
 
 /// Write an in-memory keypair out to a file.
+#[allow(unused)]
 pub fn export_keypair_to_file(
     private_key: &RsaPrivateKey,
     public_key: &RsaPublicKey,
@@ -88,6 +96,7 @@ pub fn import_public_key_from_binary(
     Ok(public_key)
 }
 
+#[allow(unused)]
 pub fn export_public_key_to_binary(public_key: &RsaPublicKey) -> Result<[u8; 1038], Error> {
     let public_key_binary = RsaPublicKey::to_pkcs1_der(public_key).unwrap();
     let public_key_ref = public_key_binary.as_der();

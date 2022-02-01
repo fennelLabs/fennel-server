@@ -1,8 +1,6 @@
 extern crate test;
 
-#[cfg(test)]
 use crate::rsa_tools::*;
-use std::path::PathBuf;
 use test::Bencher;
 
 #[bench]
