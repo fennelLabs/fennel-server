@@ -85,6 +85,6 @@ async fn test_get_messages() {
     };
     assert_eq!(submit_identity(id_db, packet).await, &[0]);
     assert_eq!(send_message(db, packet).await, &[0]);
-    let result: Vec<[u8; 3169]> = get_messages(db_2, id_db_2, packet).await;
+    let result: Vec<[u8; 3182]> = get_messages(db_2, id_db_2, packet).await;
     assert_ne!(result.len(), 0);
 }
