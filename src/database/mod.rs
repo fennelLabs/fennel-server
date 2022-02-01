@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests;
 
-use crate::{rsa_tools::hash, types::Bytes};
+use crate::rsa_tools::hash;
 use rocksdb::Error;
 use rocksdb::IteratorMode;
 use rocksdb::DB;
@@ -61,11 +61,12 @@ pub fn retrieve_messages(db_lock: Arc<Mutex<DB>>, identity: Identity) -> Vec<Mes
 
 pub fn insert_identity(db_lock: Arc<Mutex<DB>>, identity: &Identity) -> Result<(), Error> {
     let db = db_lock.lock().unwrap();
-    db.put::<_, Vec<_>>(identity.id, identity.into()).unwrap();
+    db.put::<_, Vec<_>>(identity.id, identity.encode()).unwrap();
     Ok(())
 }
 
 pub fn retrieve_identity(db_lock: Arc<Mutex<DB>>, id: [u8; 32]) -> Identity {
     let db = db_lock.lock().unwrap();
-    Identity::from(db.get(id).expect("failed to retrieve identity").unwrap())
+    let value = db.get(id).expect("failed to retrieve identity").unwrap();
+    Decode::decode(&mut &*value).unwrap()
 }
