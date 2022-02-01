@@ -39,7 +39,7 @@ pub async fn handle_connection(
         stream.write_all(r).await?;
         stream.write_all(&[0]).await?;
     } else if server_packet.command == [2] {
-        let r_list = get_messages(message_db, server_packet).await;
+        let r_list = get_messages(message_db, identity_db, server_packet).await;
         for r in r_list {
             stream.write_all(&r).await?;
         }
@@ -114,9 +114,12 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
     }
 }
 
-async fn get_messages(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> Vec<[u8; 3169]> {
-    let copied_db = Arc::clone(&db);
-    let messages = retrieve_messages(db, retrieve_identity(copied_db, packet.identity));
+async fn get_messages(
+    messages_db: Arc<Mutex<DB>>,
+    identity_db: Arc<Mutex<DB>>,
+    packet: FennelServerPacket,
+) -> Vec<[u8; 3169]> {
+    let messages = retrieve_messages(messages_db, retrieve_identity(identity_db, packet.identity));
     let mut result: Vec<[u8; 3169]> = Vec::new();
     for message in messages {
         result.push(message_to_bytes(&message).try_into().unwrap());
