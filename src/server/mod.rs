@@ -118,11 +118,13 @@ async fn get_messages(
     messages_db: Arc<Mutex<DB>>,
     identity_db: Arc<Mutex<DB>>,
     packet: FennelServerPacket,
-) -> Vec<[u8; 3169]> {
+) -> Vec<[u8; 3182]> {
     let messages = retrieve_messages(messages_db, retrieve_identity(identity_db, packet.identity));
-    let mut result: Vec<[u8; 3169]> = Vec::new();
+    let mut result: Vec<[u8; 3182]> = Vec::new();
     for message in messages {
-        result.push(message_to_bytes(&message).try_into().unwrap());
+        let message_bytes = message_to_bytes(&message);
+        println!("{}", message_bytes.len());
+        result.push(message_bytes.try_into().unwrap());
     }
     result
 }
