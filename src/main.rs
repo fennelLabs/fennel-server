@@ -1,7 +1,6 @@
 #![feature(test)]
 #[forbid(unsafe_code)]
 #[deny(warnings)]
-
 mod database;
 mod rsa_tools;
 mod server;

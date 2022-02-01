@@ -1,7 +1,7 @@
 use crate::database::*;
 use std::sync::Arc;
 
-use crate::{types::Bytes, get_identity_database_handle};
+use crate::{get_identity_database_handle, types::Bytes};
 
 #[test]
 fn test_identity_to_bytes() {

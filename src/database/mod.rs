@@ -25,14 +25,19 @@ pub struct Message {
 
 impl From<&Identity> for Vec<u8> {
     fn from(identity: &Identity) -> Vec<u8> {
-        [identity.id.as_slice(), identity.fingerprint.as_slice(), identity.public_key.as_slice()].concat()
+        [
+            identity.id.as_slice(),
+            identity.fingerprint.as_slice(),
+            identity.public_key.as_slice(),
+        ]
+        .concat()
     }
 }
 
 // TODO: Maybe `TryFrom`?
 impl From<Vec<u8>> for Identity {
     fn from(bytes: Vec<u8>) -> Identity {
-         Identity {
+        Identity {
             id: bytes[0..32].try_into().unwrap(),
             fingerprint: bytes[32..64].try_into().unwrap(),
             public_key: bytes[64..1102].try_into().unwrap(),
@@ -40,23 +45,24 @@ impl From<Vec<u8>> for Identity {
     }
 }
 
-
 impl From<&Message> for Vec<u8> {
     fn from(msg: &Message) -> Vec<u8> {
-        [msg.sender_id.as_slice(), 
-            msg.fingerprint.as_slice(), 
-            msg.message.as_slice(), 
-            msg.signature.as_slice(), 
-            msg.public_key.as_slice(), 
-            msg.recipient_id.as_slice()
-        ].concat()
+        [
+            msg.sender_id.as_slice(),
+            msg.fingerprint.as_slice(),
+            msg.message.as_slice(),
+            msg.signature.as_slice(),
+            msg.public_key.as_slice(),
+            msg.recipient_id.as_slice(),
+        ]
+        .concat()
     }
 }
 
 // TODO: maybe `TryFrom`?
 impl From<Vec<u8>> for Message {
     fn from(bytes: Vec<u8>) -> Message {
-         Message {
+        Message {
             sender_id: bytes[0..32].try_into().unwrap(),
             fingerprint: bytes[32..64].try_into().unwrap(),
             message: bytes[64..1088].try_into().unwrap(),
@@ -64,7 +70,6 @@ impl From<Vec<u8>> for Message {
             public_key: bytes[2112..3150].try_into().unwrap(),
             recipient_id: bytes[3150..3182].try_into().unwrap(),
         }
-   
     }
 }
 
@@ -109,9 +114,5 @@ pub fn insert_identity(db_lock: Arc<Mutex<DB>>, identity: &Identity) -> Result<(
 
 pub fn retrieve_identity(db_lock: Arc<Mutex<DB>>, id: [u8; 32]) -> Identity {
     let db = db_lock.lock().unwrap();
-    Identity::from(
-        db.get(id)
-            .expect("failed to retrieve identity")
-            .unwrap(),
-    )
+    Identity::from(db.get(id).expect("failed to retrieve identity").unwrap())
 }
