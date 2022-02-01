@@ -2,12 +2,12 @@
 mod tests;
 
 use crate::rsa_tools::hash;
+use codec::{Decode, Encode};
 use rocksdb::Error;
 use rocksdb::IteratorMode;
 use rocksdb::DB;
 use std::sync::Arc;
 use std::sync::Mutex;
-use codec::{Encode, Decode};
 
 #[derive(Encode, Decode)]
 pub struct Identity {
