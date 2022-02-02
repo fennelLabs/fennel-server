@@ -3,13 +3,11 @@ use crate::get_message_database_handle;
 use crate::rsa_tools::{generate_keypair, sign};
 use crate::server::export_public_key_to_binary;
 use crate::server::get_messages;
-use crate::server::import_public_key_from_binary;
 use crate::server::parse_packet;
 use crate::server::send_message;
 use crate::server::submit_identity;
 use crate::server::verify_packet_signature;
 use crate::server::FennelServerPacket;
-use crate::server::Message;
 use std::sync::Arc;
 
 #[cfg(test)]
