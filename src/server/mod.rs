@@ -43,6 +43,7 @@ pub async fn handle_connection(
     } else if server_packet.command == [2] {
         let r_list = get_messages(message_db, identity_db, server_packet).await;
         for r in r_list {
+            stream.write_all(&[1]).await?;
             stream.write_all(&r).await?;
         }
         stream.write_all(&[0]).await?;
