@@ -1,25 +1,14 @@
 #[cfg(test)]
 mod tests;
 
-use crate::database::*;
-use crate::rsa_tools::*;
-use codec::Encode;
+use codec::{Decode, Encode};
+use fennel_lib::{
+    import_public_key_from_binary, insert_identity, insert_message, retrieve_identity,
+    retrieve_messages, verify, FennelServerPacket, Identity, Message,
+};
 use rocksdb::DB;
-use std::sync::Arc;
-use std::sync::Mutex;
-use tokio::io::*;
-use tokio::net::TcpStream;
-
-#[derive(Copy, Clone)]
-struct FennelServerPacket {
-    command: [u8; 1],
-    identity: [u8; 32],
-    fingerprint: [u8; 32],
-    message: [u8; 1024],
-    signature: [u8; 1024],
-    public_key: [u8; 1038],
-    recipient: [u8; 32],
-}
+use std::sync::{Arc, Mutex};
+use tokio::{io::*, net::TcpStream};
 
 pub async fn handle_connection(
     identity_db: Arc<Mutex<DB>>,
@@ -28,7 +17,7 @@ pub async fn handle_connection(
 ) -> Result<()> {
     let mut buffer = [0; 3184];
     stream.read_exact(&mut buffer).await.unwrap();
-    let server_packet: FennelServerPacket = parse_packet(buffer);
+    let server_packet: FennelServerPacket = Decode::decode(&mut (buffer.as_slice())).unwrap();
     if !verify_packet_signature(&server_packet) {
         panic!("packet signature failed to verify");
     }
@@ -52,30 +41,6 @@ pub async fn handle_connection(
     }
 
     Ok(())
-}
-
-fn parse_packet(buffer: [u8; 3184]) -> FennelServerPacket {
-    FennelServerPacket {
-        command: buffer[0..1].try_into().expect("slice with incorrect lenth"),
-        identity: buffer[1..33]
-            .try_into()
-            .expect("slice with incorrect length"),
-        fingerprint: buffer[33..65]
-            .try_into()
-            .expect("slice with incorrect length"),
-        message: buffer[65..1089]
-            .try_into()
-            .expect("slice with incorrect length"),
-        signature: buffer[1089..2113]
-            .try_into()
-            .expect("slice with incorrect length"),
-        public_key: buffer[2113..3151]
-            .try_into()
-            .expect("slice with incorrect length"),
-        recipient: buffer[3151..3183]
-            .try_into()
-            .expect("slice with incorrect length"),
-    }
 }
 
 fn verify_packet_signature(packet: &FennelServerPacket) -> bool {
@@ -121,11 +86,11 @@ async fn get_messages(
     messages_db: Arc<Mutex<DB>>,
     identity_db: Arc<Mutex<DB>>,
     packet: FennelServerPacket,
-) -> Vec<[u8; 3182]> {
+) -> Vec<Vec<u8>> {
     let messages = retrieve_messages(messages_db, retrieve_identity(identity_db, packet.identity));
-    let mut result: Vec<[u8; 3182]> = Vec::new();
+    let mut result: Vec<Vec<u8>> = Vec::new();
     for message in messages {
-        result.push(message.encode().try_into().unwrap());
+        result.push(message.encode());
     }
     result
 }

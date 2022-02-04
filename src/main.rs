@@ -1,12 +1,10 @@
 #![feature(test)]
-#[forbid(unsafe_code)]
-#[deny(warnings)]
-mod database;
-mod rsa_tools;
+
+extern crate fennel_lib;
+
 mod server;
 
-use crate::database::get_identity_database_handle;
-use crate::database::get_message_database_handle;
+use fennel_lib::{get_identity_database_handle, get_message_database_handle};
 use server::*;
 use std::sync::Arc;
 use tokio::net::TcpListener;
