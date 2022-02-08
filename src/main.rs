@@ -11,6 +11,7 @@ use tokio::net::TcpListener;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
+    println!("Welcome to Fennel Server");
     let listener = TcpListener::bind("127.0.0.1:7878").await.unwrap();
     let identity_db = get_identity_database_handle();
     let message_db = get_message_database_handle();
