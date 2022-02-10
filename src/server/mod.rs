@@ -16,13 +16,15 @@ pub async fn handle_connection(
     mut stream: TcpStream,
 ) -> Result<()> {
     println!("begin handling new connection");
-    let mut buffer = [0; 3111];
+    let mut buffer = [0; 4137];
     stream.read_exact(&mut buffer).await.unwrap();
     println!("received a packet");
     let server_packet: FennelServerPacket = Decode::decode(&mut (buffer.as_slice())).unwrap();
     println!("packet decoded successfully");
     if !verify_packet_signature(&server_packet) {
         panic!("packet signature failed to verify");
+    } else {
+        println!("packet signature verified successfully");
     }
     if server_packet.command == [0] {
         let r = submit_identity(identity_db, server_packet).await;

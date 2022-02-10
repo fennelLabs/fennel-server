@@ -1,5 +1,5 @@
 cargo build
-cargo test
 cargo doc
+cargo test -- --test-threads=1
 
 cargo run
