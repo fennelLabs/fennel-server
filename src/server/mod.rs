@@ -3,8 +3,8 @@ mod tests;
 
 use codec::{Decode, Encode};
 use fennel_lib::{
-    import_public_key_from_binary, insert_identity, insert_message, retrieve_identity,
-    retrieve_messages, verify, FennelServerPacket, Identity, Message, hash,
+    hash, import_public_key_from_binary, insert_identity, insert_message, retrieve_identity,
+    retrieve_messages, verify, FennelServerPacket, Identity, Message,
 };
 use rocksdb::DB;
 use std::sync::{Arc, Mutex};

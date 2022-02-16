@@ -1,12 +1,12 @@
 use fennel_lib::{
-    export_public_key_to_binary, generate_keypair, get_identity_database_handle,
-    get_message_database_handle, sign, import_keypair_from_file, export_keypair_to_file,
+    export_keypair_to_file, export_public_key_to_binary, generate_keypair,
+    get_identity_database_handle, get_message_database_handle, import_keypair_from_file, sign,
 };
 
 use crate::server::{
     get_messages, send_message, submit_identity, verify_packet_signature, FennelServerPacket,
 };
-use std::{sync::Arc, path::PathBuf};
+use std::{path::PathBuf, sync::Arc};
 
 fn handle_generate_keypair() -> (rsa::RsaPrivateKey, rsa::RsaPublicKey) {
     let (private_key, public_key): (rsa::RsaPrivateKey, rsa::RsaPublicKey) =
