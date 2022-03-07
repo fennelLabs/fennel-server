@@ -80,6 +80,7 @@ async fn submit_identity(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'st
             id: packet.identity,
             fingerprint: packet.fingerprint,
             public_key: packet.public_key,
+            shared_secret_key: [0; 32],
         }),
     );
     match r {
