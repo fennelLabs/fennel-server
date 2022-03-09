@@ -105,6 +105,7 @@ async fn send_message(db: Arc<Mutex<DB>>, packet: FennelServerPacket) -> &'stati
                 signature: packet.signature,
                 public_key: packet.public_key,
                 recipient_id: packet.recipient,
+                message_type: packet.message_type,
             },
         );
         match r {

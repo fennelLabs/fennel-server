@@ -47,6 +47,7 @@ fn test_verify_packet_signature() {
         signature: signature.try_into().unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient: [0; 4],
+        message_type: [0; 1],
     };
     assert_eq!(verify_packet_signature(&packet), true);
 }
@@ -64,6 +65,7 @@ async fn test_submit_identity() {
         signature: signature.try_into().unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient: [0; 4],
+        message_type: [0; 1],
     };
     assert_eq!(submit_identity(db, packet).await, &[0]);
 }
@@ -81,6 +83,7 @@ async fn test_send_message() {
         signature: signature.try_into().unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient: [0; 4],
+        message_type: [0; 1],
     };
     assert_eq!(send_message(db, packet).await, &[0]);
 }
@@ -101,6 +104,7 @@ async fn test_get_messages() {
         signature: signature.try_into().unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient: [0; 4],
+        message_type: [0; 1],
     };
     assert_eq!(submit_identity(id_db, packet).await, &[0]);
     assert_eq!(send_message(db, packet).await, &[0]);
