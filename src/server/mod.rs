@@ -16,7 +16,7 @@ pub async fn handle_connection(
     mut stream: TcpStream,
 ) -> Result<()> {
     println!("begin handling new connection");
-    let mut buffer = [0; 3111];
+    let mut buffer = [0; 3112];
     stream.read_exact(&mut buffer).await.unwrap();
     println!("received a packet");
     let server_packet: FennelServerPacket = Decode::decode(&mut (buffer.as_slice())).unwrap();
