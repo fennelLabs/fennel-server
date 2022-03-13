@@ -28,6 +28,21 @@ pub async fn handle_connection(
         if server_packet.command == [0] {
             let r = submit_identity(identity_db, server_packet).await;
             stream.write_all(r).await?;
+        } else if server_packet.command == [3] {
+            let identity_id = server_packet.identity;
+            let r = retrieve_identity(identity_db, identity_id);
+            let packet = FennelServerPacket {
+                command: [3; 1],
+                identity: r.id,
+                fingerprint: r.fingerprint,
+                message: [0; 1024],
+                signature: [0; 1024],
+                public_key: r.public_key,
+                recipient: [0; 4],
+                message_type: [0; 1],
+            };
+            stream.write_all(&packet.encode()).await?;
+            stream.write_all(&[0]).await?;
         } else if server_packet.command == [1] {
             let r = send_message(message_db, server_packet).await;
             stream.write_all(r).await?;
