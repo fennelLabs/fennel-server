@@ -26,9 +26,11 @@ pub async fn handle_connection(
     } else {
         println!("packet signature verified successfully");
         if server_packet.command == [0] {
+            // Submit Identity
             let r = submit_identity(identity_db, server_packet).await;
             stream.write_all(r).await?;
         } else if server_packet.command == [3] {
+            // Retrieve Identity
             let identity_id = server_packet.identity;
             let r = retrieve_identity(identity_db, identity_id);
             let packet = FennelServerPacket {
@@ -44,9 +46,11 @@ pub async fn handle_connection(
             stream.write_all(&packet.encode()).await?;
             stream.write_all(&[0]).await?;
         } else if server_packet.command == [1] {
+            // Send Message
             let r = send_message(message_db, server_packet).await;
             stream.write_all(r).await?;
         } else if server_packet.command == [2] {
+            // Receive all new messages
             let r_list = get_messages(message_db, identity_db, server_packet).await;
             let mut length: u8 = r_list.len().try_into().unwrap();
             let mut it = r_list.into_iter().peekable();
