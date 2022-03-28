@@ -1,5 +1,3 @@
-#![feature(test)]
-
 extern crate fennel_lib;
 
 mod server;
