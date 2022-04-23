@@ -17,7 +17,7 @@ fn handle_generate_keypair() -> (rsa::RsaPrivateKey, rsa::RsaPublicKey) {
             Ok(v) => v,
             Err(_) => {
                 println!("Setting up a new keypair...");
-                let (private_key, public_key) = generate_keypair(8192);
+                let (private_key, public_key) = generate_keypair(4096);
                 println!("Finished.");
 
                 export_keypair_to_file(
@@ -38,12 +38,13 @@ fn handle_generate_keypair() -> (rsa::RsaPrivateKey, rsa::RsaPublicKey) {
 #[test]
 fn test_verify_packet_signature() {
     let (private_key, public_key) = handle_generate_keypair();
-    let signature = sign(private_key, [1; 1024].to_vec());
+    let signature = sign(private_key, [1; 512].to_vec());
+    println!("Signature length: {}", signature.len());
     let packet = FennelServerPacket {
         command: [0; 1],
         identity: [0; 4],
         fingerprint: [0; 16],
-        message: [1; 1024],
+        message: [1; 512],
         signature: signature.try_into().unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient: [0; 4],
@@ -55,13 +56,13 @@ fn test_verify_packet_signature() {
 #[tokio::test]
 async fn test_submit_identity() {
     let (private_key, public_key) = handle_generate_keypair();
-    let signature = sign(private_key, [1; 1024].to_vec());
+    let signature = sign(private_key, [1; 512].to_vec());
     let db = get_identity_database_handle();
     let packet = FennelServerPacket {
         command: [0; 1],
         identity: [0; 4],
         fingerprint: [0; 16],
-        message: [1; 1024],
+        message: [1; 512],
         signature: signature.try_into().unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient: [0; 4],
@@ -73,13 +74,13 @@ async fn test_submit_identity() {
 #[tokio::test]
 async fn test_send_message() {
     let (private_key, public_key) = handle_generate_keypair();
-    let signature = sign(private_key, [1; 1024].to_vec());
+    let signature = sign(private_key, [1; 512].to_vec());
     let db = get_message_database_handle();
     let packet = FennelServerPacket {
         command: [0; 1],
         identity: [0; 4],
         fingerprint: [0; 16],
-        message: [1; 1024],
+        message: [1; 512],
         signature: signature.try_into().unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient: [0; 4],
@@ -91,7 +92,7 @@ async fn test_send_message() {
 #[tokio::test]
 async fn test_get_messages() {
     let (private_key, public_key) = handle_generate_keypair();
-    let signature = sign(private_key, [1; 1024].to_vec());
+    let signature = sign(private_key, [1; 512].to_vec());
     let db = get_message_database_handle();
     let id_db = get_identity_database_handle();
     let db_2 = Arc::clone(&db);
@@ -100,7 +101,7 @@ async fn test_get_messages() {
         command: [0; 1],
         identity: [0; 4],
         fingerprint: [0; 16],
-        message: [1; 1024],
+        message: [1; 512],
         signature: signature.try_into().unwrap(),
         public_key: export_public_key_to_binary(&public_key).unwrap(),
         recipient: [0; 4],

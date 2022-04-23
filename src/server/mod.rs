@@ -16,7 +16,7 @@ pub async fn handle_connection(
     mut stream: TcpStream,
 ) -> Result<()> {
     println!("begin handling new connection");
-    let mut buffer = [0; 3112];
+    let mut buffer = [0; 1576];
     stream.read_exact(&mut buffer).await.unwrap();
     println!("received a packet");
     let server_packet: FennelServerPacket = Decode::decode(&mut (buffer.as_slice())).unwrap();
@@ -29,16 +29,18 @@ pub async fn handle_connection(
             // Submit Identity
             let r = submit_identity(identity_db, server_packet).await;
             stream.write_all(r).await?;
+            println!("identity added successfully: {:?}", server_packet.identity);
         } else if server_packet.command == [3] {
             // Retrieve Identity
             let identity_id = server_packet.identity;
+            println!("retrieving messages for identity: {:?}", identity_id);
             let r = retrieve_identity(identity_db, identity_id);
             let packet = FennelServerPacket {
                 command: [3; 1],
                 identity: r.id,
                 fingerprint: r.fingerprint,
-                message: [0; 1024],
-                signature: [0; 1024],
+                message: [0; 512],
+                signature: [0; 512],
                 public_key: r.public_key,
                 recipient: [0; 4],
                 message_type: [0; 1],
